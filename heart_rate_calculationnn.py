@@ -212,3 +212,4 @@ plt.axvspan(*hf_band, color='red', alpha=0.3, label='HF Band')
 plt.legend()
 plt.tight_layout()
 plt.show()
+# Plot PSD
