@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import butter, filtfilt, find_peaks, welch
 from scipy.ndimage import uniform_filter1d
+import io  # Import io for StringIO
 
 # -----------------------------------------
 # Title: Heart Rate Calculation from ECG Signals
@@ -60,9 +61,11 @@ if uploaded_files:
 
         st.write("Data Preview:")
         st.write(data.head())
-        buffer = []
+        
+        # Use StringIO to capture data.info() output
+        buffer = io.StringIO()
         data.info(buf=buffer)
-        info_str = "".join(buffer)
+        info_str = buffer.getvalue()
         st.text(info_str)
 
     with tab2:
@@ -212,6 +215,5 @@ if uploaded_files:
         ax.axvspan(*hf_band, color='red', alpha=0.3, label='HF Band')
         ax.legend()
         st.pyplot(fig)
-
 else:
     st.write("Please upload one or more CSV files to proceed.")
