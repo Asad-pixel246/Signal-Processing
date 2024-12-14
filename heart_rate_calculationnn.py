@@ -1,3 +1,4 @@
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,6 +8,8 @@ from scipy.ndimage import uniform_filter1d
 # -----------------------------------------
 # Title: Heart Rate Calculation from ECG Signals Using Signal Processing Techniques
 # -----------------------------------------
+
+st.title("Heart Rate Calculation from ECG Signals")
 
 # Step 1: Load Data
 file_path = r'C:\Users\asadn\Downloads\datanew.csv'  # Update to your actual path
@@ -21,6 +24,8 @@ print(data.info())
 if 'sample #' not in data.columns or 'MLII' not in data.columns:
     raise ValueError("Input CSV must contain 'sample #' and 'MLII' columns.")
 
+if st.sidebar.button("Process ECG"):
+    st.write("Processing ECG signal...")
 # Step 2: Preprocessing - Bandpass Filtering
 def bandpass_filter(signal, lowcut, highcut, fs, order=4):
     """Apply a Butterworth bandpass filter."""
@@ -42,19 +47,6 @@ sample_numbers = data['sample #'].values[fs:]
 # (Optional) Remove DC offset
 filtered_signal = filtered_signal - np.mean(filtered_signal)
 
-# Visualize the first 1000 samples to check filtering
-plt.figure(figsize=(10, 4))
-plt.plot(data['sample #'][:1000], data['MLII'][:1000], label='Original')
-plt.plot(data['sample #'][:1000], 
-         (bandpass_filter(data['MLII'].values, 0.5, 50, fs) - np.mean(bandpass_filter(data['MLII'].values, 0.5, 50, fs)))[:1000], 
-         label='Filtered', alpha=0.7)
-plt.legend()
-plt.title('ECG Signal Preprocessing')
-plt.xlabel('Sample Number')
-plt.ylabel('Amplitude')
-plt.tight_layout()
-plt.show()
-
 # Step 3: R-Peak Detection
 def detect_r_peaks(signal, distance, height):
     """Detect peaks in the ECG signal that represent R-peaks."""
@@ -67,33 +59,6 @@ height = 0.6 * np.max(dynamic_height)
 distance = int(0.5 * fs)  # Min distance between peaks ~ 0.5s
 
 r_peaks = detect_r_peaks(filtered_signal, distance, height)
-
-# Plot detected R-peaks on a portion of the signal
-plot_range = 2000
-plt.figure(figsize=(10, 4))
-plt.plot(sample_numbers[:plot_range], filtered_signal[:plot_range], label='Filtered Signal')
-if len(r_peaks) > 0:
-    peaks_to_plot = r_peaks[r_peaks < plot_range]
-    plt.plot(sample_numbers[peaks_to_plot], filtered_signal[peaks_to_plot], 'ro', label='Detected R-Peaks')
-plt.legend()
-plt.title('R-Peak Detection')
-plt.xlabel('Sample Number')
-plt.ylabel('Amplitude')
-plt.tight_layout()
-plt.show()
-
-# Debug plot: Overlay detected peaks on entire signals
-""" plt.figure(figsize=(10, 4))
-plt.plot(sample_numbers, data['MLII'].values[fs:], label='Original Signal')
-plt.plot(sample_numbers, filtered_signal, label='Filtered Signal', alpha=0.7)
-if len(r_peaks) > 0:
-    plt.plot(sample_numbers[r_peaks], filtered_signal[r_peaks], 'ro', label='R-Peaks')
-plt.legend()
-plt.title('R-Peak Detection Validation')
-plt.xlabel('Sample Number')
-plt.ylabel('Amplitude')
-plt.tight_layout()
-plt.show() """
 
 # Step 4: Heart Rate Calculation
 def calculate_heart_rate(peaks, fs):
@@ -126,6 +91,49 @@ bpm = 60 / valid_rr_intervals
 print(f"Mean Heart Rate: {np.mean(bpm):.2f} BPM")
 print(f"Min Heart Rate: {np.min(bpm):.2f} BPM")
 print(f"Max Heart Rate: {np.max(bpm):.2f} BPM")
+
+
+
+st.write("Displaying results...")
+# Visualize the first 1000 samples to check filtering
+plt.figure(figsize=(10, 4))
+plt.plot(data['sample #'][:1000], data['MLII'][:1000], label='Original')
+plt.plot(data['sample #'][:1000], 
+         (bandpass_filter(data['MLII'].values, 0.5, 50, fs) - np.mean(bandpass_filter(data['MLII'].values, 0.5, 50, fs)))[:1000], 
+         label='Filtered', alpha=0.7)
+plt.legend()
+plt.title('ECG Signal Preprocessing')
+plt.xlabel('Sample Number')
+plt.ylabel('Amplitude')
+plt.tight_layout()
+plt.show()
+
+# Plot detected R-peaks on a portion of the signal
+plot_range = 2000
+plt.figure(figsize=(10, 4))
+plt.plot(sample_numbers[:plot_range], filtered_signal[:plot_range], label='Filtered Signal')
+if len(r_peaks) > 0:
+    peaks_to_plot = r_peaks[r_peaks < plot_range]
+    plt.plot(sample_numbers[peaks_to_plot], filtered_signal[peaks_to_plot], 'ro', label='Detected R-Peaks')
+plt.legend()
+plt.title('R-Peak Detection')
+plt.xlabel('Sample Number')
+plt.ylabel('Amplitude')
+plt.tight_layout()
+plt.show()
+
+# Debug plot: Overlay detected peaks on entire signals
+""" plt.figure(figsize=(10, 4))
+plt.plot(sample_numbers, data['MLII'].values[fs:], label='Original Signal')
+plt.plot(sample_numbers, filtered_signal, label='Filtered Signal', alpha=0.7)
+if len(r_peaks) > 0:
+    plt.plot(sample_numbers[r_peaks], filtered_signal[r_peaks], 'ro', label='R-Peaks')
+plt.legend()
+plt.title('R-Peak Detection Validation')
+plt.xlabel('Sample Number')
+plt.ylabel('Amplitude')
+plt.tight_layout()
+plt.show() """
 
 # Step 5: Visualization of Heart Rate Over Time
 plt.figure(figsize=(10, 4))
@@ -212,4 +220,3 @@ plt.axvspan(*hf_band, color='red', alpha=0.3, label='HF Band')
 plt.legend()
 plt.tight_layout()
 plt.show()
-# Plot PSD
