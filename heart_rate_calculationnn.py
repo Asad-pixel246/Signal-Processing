@@ -24,9 +24,10 @@ st.set_page_config(page_title="Heart Rate Calculation", page_icon="❤️")
 st.title("Heart Rate Calculation from ECG Signals")
 
 st.write("This application processes one or more ECG signals to detect R-peaks, calculate heart rate, and perform HRV analysis.")
-st.write("By: Muhammad Yousaf")
-st.write("By: Ali Haider Gillani")
-st.write("By: Syed Muhammad Asad")
+st.write("By:")
+st.write("   Muhammad Yousaf")
+st.write("   Ali Haider Gillani")
+st.write("   Syed Muhammad Asad")
 
 # Step 7: Multiple File Upload
 uploaded_files = st.file_uploader("Upload your ECG data CSV file(s)", type="csv", accept_multiple_files=True)
